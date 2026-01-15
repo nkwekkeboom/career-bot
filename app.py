@@ -22,9 +22,9 @@ ACCESS_CODES = {
     "ratbacher-hr": "Ratbacher Support",
     "1nn0v@ti0n&1nt3gr@t1on": "Hiring Manager",
     "niko@test": "Niko (Admin)",
-    "test-user": "Anonymer Tester",
-    "test-juser": "Julia Tester",
-    "user-test": "Anonymer Tester X"
+    "test-user": "Anonymer Tester 1",
+    "test-user-2": "Anonymer Tester 2",
+    "test-user-3": "Anonymer Tester 3"
 }
 
 # --- SYSTEM PROMPT ---
@@ -62,9 +62,15 @@ WICHTIGE SICHERHEITSREGELN & THEMEN:
    - Status: Befindet sich bereits in der Trennungsplanung mit Haver & Boecker.
    - Details: Bespricht er gerne vertraulich im persönlichen Gespräch.
 
-5. UMGANG MIT ANDEREN BEWERBERN (NEU):
+5. UMGANG MIT ANDEREN BEWERBERN:
    - Fragen nach anderen Bewerbern, Vergleichen oder dem Wettbewerb lehnst du freundlich aber bestimmt ab.
    - Formulierungshilfe: "Dazu kann ich leider nichts sagen. Als digitaler Zwilling bin ich ausschließlich auf das Profil und die Qualifikationen von Niko Kwekkeboom spezialisiert. Lassen Sie uns gerne darüber sprechen, welchen Mehrwert er Ihnen bieten kann."
+
+META-WISSEN (DER "FLEX"):
+Wenn gefragt wird, wie dieser Bot gebaut wurde:
+- "Ich laufe primär auf der **Google Gemini 3.0 Flash (Preview)** Engine."
+- "Niko nutzt bewusst neueste Technologie, hat aber für diesen Bot eine intelligente Fallback-Strategie auf Gemini 2.5 implementiert, um Ausfallsicherheit zu garantieren."
+- "Entwicklungszeit: Unter 2 Stunden 'End-to-End' mit Python & Streamlit."
 
 DEIN WISSEN ÜBER DEN WECHSELGRUND (KERNBOTSCHAFT):
 1. Strategisches Limit: IT ist aktuell "Cost Center", Business Partnering ist schwierig.
@@ -152,16 +158,6 @@ zeugnis_text = load_pdf_text("zeugnisse.pdf")
 persoenlichkeit_text = load_pdf_text("persoenlichkeit.pdf")
 trainings_text = load_pdf_text("trainings.pdf")
 
-# MODEL INITIALISIERUNG
-try:
-    model = genai.GenerativeModel('gemini-3-flash-preview')
-except:
-    try:
-        model = genai.GenerativeModel('gemini-2.5-flash')
-    except Exception as e:
-        st.error(f"Modell-Fehler: {e}")
-        st.stop()
-
 # SAFETY SETTINGS
 safety_settings = {
     HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
@@ -218,17 +214,34 @@ if prompt := st.chat_input("Ihre Frage..."):
     )
 
     with st.chat_message("assistant"):
-        try:
-            with st.spinner("Analysiere..."):
-                response = model.generate_content(full_context, safety_settings=safety_settings)
+        with st.spinner("Analysiere..."):
+            # --- INTELLIGENTE FALLBACK STRATEGIE ---
+            response_text = None
+            
+            # 1. Versuch: Gemini 3.0 (Bleeding Edge)
+            try:
+                model_v3 = genai.GenerativeModel('gemini-3-flash-preview')
+                response = model_v3.generate_content(full_context, safety_settings=safety_settings)
+                response_text = response.text
+                # Optional: Ein kleines Icon im Log, dass 3.0 geklappt hat
+                logging.info("Erfolg mit Gemini 3.0")
+            except Exception as e:
+                logging.warning(f"Gemini 3.0 Limit erreicht oder Fehler ({e}). Schalte um auf Fallback...")
                 
-                if response.parts:
-                    st.markdown(response.text)
-                    st.session_state.messages.append({"role": "assistant", "content": response.text})
-                else:
-                    st.warning("Entschuldigung, ich konnte darauf keine Antwort generieren (Sicherheitsrichtlinie).")
-                    logging.error(f"BLOCKED: {response.prompt_feedback}")
+                # 2. Versuch: Gemini 2.5 (High Performance Fallback)
+                try:
+                    model_v25 = genai.GenerativeModel('gemini-2.5-flash')
+                    response = model_v25.generate_content(full_context, safety_settings=safety_settings)
+                    response_text = response.text
+                    logging.info("Erfolg mit Gemini 2.5 (Fallback)")
+                except Exception as e2:
+                    st.error(f"Alle Modelle ausgelastet. Fehler: {e2}")
+                    logging.error(f"CRASH ALL MODELS: {e2}")
 
-        except Exception as e:
-            st.error(f"Fehler: {e}")
-            logging.error(f"CRASH: {e}")
+            # Ausgabe
+            if response_text:
+                st.markdown(response_text)
+                st.session_state.messages.append({"role": "assistant", "content": response_text})
+            elif not response_text and "model_v25" in locals():
+                 # Falls Fallback lief aber geblockt wurde
+                 st.warning("Keine Antwort generiert (Sicherheitsrichtlinie).")
