@@ -47,6 +47,43 @@ VERHALTENSREGELN:
 # --- SETUP ---
 st.set_page_config(page_title=PAGE_TITLE, page_icon=PAGE_ICON)
 
+# API Key Check
+if "GOOGLE_API_KEY" in st.secrets:
+    genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
+else:
+    st.error("API Key fehlt in den Secrets.")
+    st.stop()
+
+# --- DIAGNOSE STARTEN ---
+# Wir prüfen, welche Modelle für deinen Key verfügbar sind
+st.subheader("🔧 System-Diagnose (Verfügbare Modelle)")
+try:
+    available_models = []
+    for m in genai.list_models():
+        if 'generateContent' in m.supported_generation_methods:
+            available_models.append(m.name)
+    
+    st.write("Gefundene Modelle:", available_models)
+    
+    # Automatische Auswahl des besten Modells aus der Liste
+    if 'models/gemini-1.5-flash' in available_models:
+        model_name = 'gemini-1.5-flash'
+    elif 'models/gemini-1.5-pro' in available_models:
+        model_name = 'gemini-1.5-pro'
+    elif 'models/gemini-pro' in available_models:
+        model_name = 'gemini-pro'
+    else:
+        st.error("Kein geeignetes Modell gefunden!")
+        st.stop()
+        
+    st.success(f"Verwende Modell: {model_name}")
+    model = genai.GenerativeModel(model_name)
+
+except Exception as e:
+    st.error(f"Fehler bei der Modell-Abfrage: {e}")
+    st.stop()
+# --- DIAGNOSE ENDE ---
+
 # Passwort-Schutz
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
