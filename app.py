@@ -1,11 +1,15 @@
 import streamlit as st
 import google.generativeai as genai
-# WICHTIG: Neue Imports für die Sicherheitseinstellungen
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
 import PyPDF2
 from io import BytesIO
 import time
 import os
+import logging
+
+# --- LOGGING KONFIGURATION ---
+# Das sorgt dafür, dass Nachrichten zuverlässig in der Streamlit-Konsole landen
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
 # --- KONFIGURATION ---
 PAGE_TITLE = "Niko Kwekkeboom | Digitaler Zwilling"
@@ -13,12 +17,13 @@ PAGE_ICON = "🚀"
 NAME = "Niko Kwekkeboom"
 PROFILE_IMAGE = "profilbild.png"
 
-# --- ZUGANGSVERWALTUNG (Aktualisiert) ---
+# --- ZUGANGSVERWALTUNG ---
 ACCESS_CODES = {
     "<1nn0v@ti0n&1nt3gr@t1on>": "Link CV",
     "ratbacher-hr": "Ratbacher Support",
     "1nn0v@ti0n&1nt3gr@t1on": "Hiring Manager",
-    "niko@test": "Niko (Admin)"
+    "niko@test": "Niko (Admin)",
+    "test-user": "Tester"
 }
 
 # --- SYSTEM PROMPT ---
@@ -90,9 +95,13 @@ if not st.session_state.authenticated:
     if st.button("Starten"):
         if pwd in ACCESS_CODES:
             st.session_state.authenticated = True
-            st.session_state.current_user = ACCESS_CODES[pwd] 
+            st.session_state.current_user = ACCESS_CODES[pwd]
+            # LOGGING: Erfolgreicher Login
+            logging.info(f"LOGIN ERFOLGREICH: User '{ACCESS_CODES[pwd]}' hat sich eingeloggt.")
             st.rerun()
         else:
+            # LOGGING: Fehlgeschlagener Login (Optional, gut für Sicherheit)
+            logging.warning(f"LOGIN FEHLGESCHLAGEN: Falsches Passwort '{pwd}' versucht.")
             st.error("Falscher Code.")
     st.stop()
 
@@ -135,8 +144,7 @@ except:
         st.error(f"Modell-Fehler: {e}")
         st.stop()
 
-# SICHERHEITS-EINSTELLUNGEN (FIX FÜR DEN GEHALTS-FEHLER)
-# Wir erlauben dem Modell explizit, über alles zu sprechen, damit es nicht blockt.
+# SAFETY SETTINGS
 safety_settings = {
     HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
     HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
@@ -147,65 +155,15 @@ safety_settings = {
 if "messages" not in st.session_state:
     st.session_state.messages = []
     
+    # NEUER BEGRÜẞUNGSTEXT (mit Zeilenumbruch)
     welcome_msg = (
-        "Moin! 👋 Ich bin der digitale Zwilling von Niko Kwekkeboom. "
+        "Moin! 👋 Ich bin der digitale Zwilling von Niko Kwekkeboom.\n\n"
         "Ich kenne seinen Werdegang, sein Persönlichkeitsprofil sowie seine Vorstellungen zu Strategie, Führung und Innovation.\n\n"
         "Frag mich gerne alles, was du wissen möchtest! \n\n"
         "*(Hinweis: Dies ist ein KI-Experiment als Arbeitsprobe. Für verbindliche Details freue ich mich auf das persönliche Gespräch!)*"
     )
     st.session_state.messages.append({"role": "assistant", "content": welcome_msg})
 
-# Layout Header
+# Layout Header (Angepasst)
 col1, col2 = st.columns([1, 3])
-with col1:
-    if os.path.exists(PROFILE_IMAGE):
-        st.image(PROFILE_IMAGE, width=130)
-with col2:
-    st.title(NAME)
-    st.caption(f"Gast: {st.session_state.current_user} | Powered by Gemini 3.0 Flash")
-
-st.markdown("---") 
-
-# Chat Loop
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
-if prompt := st.chat_input("Ihre Frage..."):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
-    
-    # Logging
-    timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-    user_id = st.session_state.current_user
-    print(f"[{timestamp}] USER: {user_id} | FRAGE: {prompt}")
-
-    full_context = (
-        f"{SYSTEM_PROMPT}\n\nCONTEXT:\n"
-        f"CV: {cv_text}\n"
-        f"STELLE: {job_text}\n"
-        f"ZEUGNISSE: {zeugnis_text}\n"
-        f"PERSÖNLICHKEITSPROFIL (Zortify): {persoenlichkeit_text}\n"
-        f"TRAININGS & ZERTIFIKATE: {trainings_text}\n\n"
-        f"FRAGE: {prompt}"
-    )
-
-    with st.chat_message("assistant"):
-        try:
-            with st.spinner("Analysiere..."):
-                # HIER WIRD DER FIX ANGEWENDET (safety_settings übergeben)
-                response = model.generate_content(full_context, safety_settings=safety_settings)
-                
-                # Prüfen, ob eine Antwort generiert wurde
-                if response.parts:
-                    st.markdown(response.text)
-                    st.session_state.messages.append({"role": "assistant", "content": response.text})
-                else:
-                    # Falls der Filter trotzdem noch greift (Fallback)
-                    fallback_msg = "Entschuldigung, meine Sicherheitsrichtlinien haben diese Antwort blockiert. Bitte formulieren Sie die Frage etwas anders."
-                    st.warning(fallback_msg)
-                    print(f"[{timestamp}] BLOCKED RESPONSE: {response.prompt_feedback}")
-
-        except Exception as e:
-            st.error(f"Ein technischer Fehler ist aufgetreten: {e}")
+with
