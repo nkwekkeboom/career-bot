@@ -4,9 +4,9 @@ import PyPDF2
 from io import BytesIO
 
 # --- KONFIGURATION ---
-PAGE_TITLE = "Digitaler Assistent von [Dein Name]"
+PAGE_TITLE = "Digitaler Assistent von Niko Kwekkeboom"
 PAGE_ICON = "🤖"
-NAME = "[Dein Name]"
+NAME = "Niko Kwekkeboom"
 
 # Hier definieren wir das Passwort
 PASSWORD = "bertelsmann-sap" 
@@ -92,7 +92,7 @@ cv_text = load_pdf_text("cv.pdf")
 job_text = load_pdf_text("stelle.pdf")
 
 # Model initialisieren
-model = genai.GenerativeModel('gemini-1.5-pro-latest')
+model = genai.GenerativeModel('gemini-1.5-flash')
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
