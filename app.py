@@ -91,6 +91,7 @@ def load_pdf_text(filename):
 # Hier Namen deiner PDFs anpassen, die du ins Repo hochlädst
 cv_text = load_pdf_text("cv.pdf.pdf")
 job_text = load_pdf_text("stelle.pdf")
+zeugnis_text = load_pdf_text("zeugnisse.pdf")
 
 # Model initialisieren
 model = genai.GenerativeModel('gemini-1.5-flash')
@@ -110,7 +111,7 @@ if prompt := st.chat_input("Ihre Frage..."):
         st.markdown(prompt)
 
     # Kontext zusammenbauen
-    full_context = f"{SYSTEM_PROMPT}\n\nCONTEXT DATEN:\nLEBENSLAUF: {cv_text}\nSTELLENANZEIGE: {job_text}\n\nFRAGE: {prompt}"
+    full_context = f"{SYSTEM_PROMPT}\n\nCONTEXT DATEN:\nLEBENSLAUF: {cv_text}\nSTELLENANZEIGE: {job_text}\nZEUGNISSE: {zeugnis_text}\n\nFRAGE: {prompt}"
 
     with st.chat_message("assistant"):
         response = model.generate_content(full_context)
