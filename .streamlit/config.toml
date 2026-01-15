@@ -1,0 +1,6 @@
+[theme]
+primaryColor = "#005CA9"  # Ein kräftiges "Bertelsmann-Blau" für Buttons & Akzente
+backgroundColor = "#FFFFFF" # Sauberer weißer Hintergrund
+secondaryBackgroundColor = "#F0F2F6" # Helles Grau für die Sidebar/Eingabefelder
+textColor = "#333333" # Dunkelgrauer Text für gute Lesbarkeit
+font = "sans serif" # Moderne, serifenlose Schrift
