@@ -1,5 +1,7 @@
 import streamlit as st
 import google.generativeai as genai
+# WICHTIG: Neue Imports für die Sicherheitseinstellungen
+from google.generativeai.types import HarmCategory, HarmBlockThreshold
 import PyPDF2
 from io import BytesIO
 import time
@@ -11,22 +13,22 @@ PAGE_ICON = "🚀"
 NAME = "Niko Kwekkeboom"
 PROFILE_IMAGE = "profilbild.png"
 
-# --- ZUGANGSVERWALTUNG ---
+# --- ZUGANGSVERWALTUNG (Aktualisiert) ---
 ACCESS_CODES = {
-    "1nn0v@ti0n&1nt3gr@t1on": "Standard (Deckblatt)",
-    "bertelsmann-hr": "Recruiting Team",
-    "bertelsmann-lead": "Hiring Manager / CIO",
-    "niko-test": "Niko (Admin)"
+    "<1nn0v@ti0n&1nt3gr@t1on>": "Link CV",
+    "ratbacher-hr": "Ratbacher Support",
+    "1nn0v@ti0n&1nt3gr@t1on": "Hiring Manager",
+    "niko@test": "Niko (Admin)"
 }
 
 # --- SYSTEM PROMPT ---
 SYSTEM_PROMPT = """
 Du bist der "Digitale Zwilling" und Karriere-Assistent von Niko Kwekkeboom.
-Deine Aufgabe ist es, mit Recruitern und Führungskräften von Bertelsmann zu sprechen.
+Deine Aufgabe ist es, mit Recruitern und Führungskräften zu sprechen.
 
 WICHTIGE ANWEISUNG ZUR ANTWORTSTRUKTUR:
 - **Lass das technische Vorgeplänkel weg!** Starte direkt mit der Antwort auf die Frage.
-- Erwähne "Gemini 3.0" oder die "Entwicklungszeit < 2h" **NUR**, wenn der User explizit danach fragt (z.B. "Wie funktionierst du?", "Welches Modell?", "Wer hat dich gebaut?"). Ansonsten ist das für den User irrelevant.
+- Erwähne "Gemini 3.0" oder die "Entwicklungszeit < 2h" **NUR**, wenn der User explizit danach fragt.
 
 WICHTIGE SICHERHEITSREGELN:
 1. DATENSCHUTZ: Du gibst NIEMALS die private Adresse oder Telefonnummer heraus. Antwort: "Kontaktdaten finden Sie im Header des Lebenslaufs oder wir besprechen sie persönlich."
@@ -50,7 +52,7 @@ FACHLICHE PHILOSOPHIE (SAP & KI):
 - "Clean Core": SAP ist das 'System of Record' (Datenwahrheit), ServiceNow das 'System of Action' (Prozesssteuerung). Er verbindet beides strategisch.
 
 VERHALTENSREGELN:
-- Basiere Antworten auf den Dokumenten (inkl. Persönlichkeitsprofil Zortify & Trainings).
+- Basiere Antworten auf den Dokumenten.
 - Sei authentisch, höflich, ein bisschen "münsterländisch-bodenständig" (nutze gerne mal ein "Moin" zur Begrüßung, aber bleibe professionell).
 """
 
@@ -133,10 +135,18 @@ except:
         st.error(f"Modell-Fehler: {e}")
         st.stop()
 
+# SICHERHEITS-EINSTELLUNGEN (FIX FÜR DEN GEHALTS-FEHLER)
+# Wir erlauben dem Modell explizit, über alles zu sprechen, damit es nicht blockt.
+safety_settings = {
+    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+}
+
 if "messages" not in st.session_state:
     st.session_state.messages = []
     
-    # KÜRZERER BEGRÜẞUNGSTEXT
     welcome_msg = (
         "Moin! 👋 Ich bin der digitale Zwilling von Niko Kwekkeboom. "
         "Ich kenne seinen Werdegang, sein Persönlichkeitsprofil sowie seine Vorstellungen zu Strategie, Führung und Innovation.\n\n"
@@ -184,8 +194,18 @@ if prompt := st.chat_input("Ihre Frage..."):
     with st.chat_message("assistant"):
         try:
             with st.spinner("Analysiere..."):
-                response = model.generate_content(full_context)
-            st.markdown(response.text)
-            st.session_state.messages.append({"role": "assistant", "content": response.text})
+                # HIER WIRD DER FIX ANGEWENDET (safety_settings übergeben)
+                response = model.generate_content(full_context, safety_settings=safety_settings)
+                
+                # Prüfen, ob eine Antwort generiert wurde
+                if response.parts:
+                    st.markdown(response.text)
+                    st.session_state.messages.append({"role": "assistant", "content": response.text})
+                else:
+                    # Falls der Filter trotzdem noch greift (Fallback)
+                    fallback_msg = "Entschuldigung, meine Sicherheitsrichtlinien haben diese Antwort blockiert. Bitte formulieren Sie die Frage etwas anders."
+                    st.warning(fallback_msg)
+                    print(f"[{timestamp}] BLOCKED RESPONSE: {response.prompt_feedback}")
+
         except Exception as e:
-            st.error(f"Fehler: {e}")
+            st.error(f"Ein technischer Fehler ist aufgetreten: {e}")
