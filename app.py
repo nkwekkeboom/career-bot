@@ -88,7 +88,7 @@ def load_pdf_text(filename):
         return ""
 
 # Hier Namen deiner PDFs anpassen, die du ins Repo hochlädst
-cv_text = load_pdf_text("cv.pdf")
+cv_text = load_pdf_text("cv.pdf.pdf")
 job_text = load_pdf_text("stelle.pdf")
 
 # Model initialisieren
