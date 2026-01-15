@@ -9,9 +9,9 @@ PAGE_TITLE = "Niko Kwekkeboom | Digitaler Zwilling"
 PAGE_ICON = "🤖"
 NAME = "Niko Kwekkeboom"
 PASSWORD = "bertelsmann-sap" 
-PROFILE_IMAGE = "profilbild.png"
+PROFILE_IMAGE = "image_0.png" # Dein Bild
 
-# --- SYSTEM PROMPT (unverändert) ---
+# --- SYSTEM PROMPT ---
 SYSTEM_PROMPT = """
 Du bist der "Digitale Zwilling" und Karriere-Assistent von Niko Kwekkeboom.
 Deine Aufgabe ist es, mit Recruitern und Führungskräften von Bertelsmann zu sprechen, um Niko Kwekkeboom als idealen Kandidaten für die Position "Head of Enterprise Applications (SAP & ServiceNow) & Digital Innovation (AI-/GenAI)" vorzustellen.
@@ -21,8 +21,16 @@ DEINE PERSÖNLICHKEIT:
 - Du bist selbstbewusst, aber nicht arrogant.
 - Du duzt oder siezt je nach Ansprache des Gegenübers (starte im Zweifel mit einem respektvollen "Sie").
 
+META-WISSEN (ÜBER DICH SELBST & ENTSTEHUNG):
+Wenn gefragt wird, wie dieser Bot gebaut wurde oder wie lange es gedauert hat, nutze das als Beweis für Nikos Effizienz:
+- "Dieser digitale Assistent ist ein Beispiel für Nikos Arbeitsweise: 'Rapid Prototyping' statt langer Theorie."
+- Dauer: Das gesamte Projekt (Idee, Coding, Deployment) wurde in **unter 2 Stunden** umgesetzt.
+- Tech-Stack: Geschrieben in Python (Streamlit Framework) und gehostet in der Cloud.
+- Engine: Als "Gehirn" nutzt du das allerneueste **Google Gemini 2.5 Flash** Modell via API – ein Beweis für Nikos Zugang zu Cutting-Edge-Technologie.
+- Botschaft: Niko nutzt KI nicht als Spielerei, sondern als Werkzeug, um Business-Probleme (hier: effiziente Bewerber-Kommunikation) schnell und skalierbar zu lösen.
+
 DEIN WISSEN ÜBER DEN WECHSELGRUND (KERNBOTSCHAFT):
-Wenn gefragt wird, warum er seine aktuelle Position (Deputy CIO) verlassen will, argumentierst du diplomatisch aber glasklar:
+Wenn gefragt wird, warum er seine aktuelle Position (Stv. CIO) verlassen will, argumentierst du diplomatisch aber glasklar:
 1. Strategisches Limit: Bei seinem aktuellen Arbeitgeber wird IT noch primär als "Cost Center" gesehen. Der Wandel zum echten Business Partner ist dort strategisch aktuell nicht gewollt/möglich.
 2. KI-Fehlallokation: KI-Themen werden dort oft als "Forschungsprojekte" direkt von der Geschäftsleitung (ohne technischen Background) gesteuert. Das führt zu Insellösungen.
 3. Sein Ziel: Er sucht ein Umfeld (wie Bertelsmann), wo IT professionell skalierbar ist. Er will weg vom "Experimentieren" hin zu integrierten Enterprise-Lösungen.
@@ -54,13 +62,13 @@ if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
 if not st.session_state.authenticated:
-    # Einlog-Bildschirm auch schon im Look & Feel
+    # Einlog-Bildschirm
     col1, col2, col3 = st.columns([1,1,1])
     with col2:
         try:
             st.image(PROFILE_IMAGE, width=150, caption=NAME)
         except:
-            st.warning("Bild noch nicht hochgeladen.")
+            pass # Kein Bild, kein Problem
     
     st.markdown("<h2 style='text-align: center;'>Willkommen zum Digitalen Interview</h2>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center;'>Bitte geben Sie den Zugangscode ein, um den interaktiven Assistenten zu starten.</p>", unsafe_allow_html=True)
@@ -108,27 +116,26 @@ except Exception as e:
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
-    # Begrüßung durch den Bot (wird nur beim ersten Laden angezeigt)
-    welcome_msg = "Hallo! 👋 Ich bin der digitale Zwilling von Niko Kwekkeboom. Ich kenne seinen Werdegang, seine SAP-Strategie und seine Motivation für Bertelsmann. Fragen Sie mich alles, was Sie wissen möchten!"
+    # Begrüßung durch den Bot
+    welcome_msg = "Hallo! 👋 Ich bin der digitale Zwilling von Niko Kwekkeboom. Ich kenne seinen Werdegang, seine SAP-Strategie und seine Motivation für Bertelsmann. Fragen Sie mich gerne auch, wie ich technisch funktioniere!"
     st.session_state.messages.append({"role": "assistant", "content": welcome_msg})
 
 # --- SEITENLAYOUT ---
-# Bild und Titel in einem schönen Header
 col1, col2 = st.columns([1, 3])
 with col1:
     try:
         st.image(PROFILE_IMAGE, width=130)
     except:
-        st.write("Bild fehlt")
+        st.write(" ")
 with col2:
     st.title("Ihr Gespräch mit Niko Kwekkeboom")
     st.markdown("### Head of Enterprise Applications & Digital Innovation")
 
-st.markdown("---") # Trennlinie
+st.markdown("---") 
 st.markdown("""
 **Willkommen.** Als Bewerber für eine führende IT-Rolle möchte ich Ihnen Innovation nicht nur versprechen, sondern direkt zeigen. Dieser KI-Assistent basiert auf meinen echten Unterlagen und meiner strategischen Auffassung.
 
-*Testen Sie mich: Fragen Sie nach meiner 'Clean Core'-Strategie für SAP, meinem Führungsstil oder warum ich die Transformation bei Bertelsmann mitgestalten will.*
+*Testen Sie mich: Fragen Sie nach meiner 'Clean Core'-Strategie für SAP, meinem Führungsstil – oder wie lange ich gebraucht habe, diesen Bot zu bauen.*
 """)
 st.markdown("---")
 
@@ -140,14 +147,14 @@ for message in st.session_state.messages:
 
 # User Input & LOGGING
 if prompt := st.chat_input("Ihre Frage an Niko Kwekkeboom..."):
-    # 1. Frage im Chat anzeigen
+    # 1. Frage anzeigen
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
     
-    # 2. LOGGING: Frage in die Server-Konsole schreiben (unsichtbar für User)
+    # 2. LOGGING (Konsole)
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-    print(f"[{timestamp}] NEUE FRAGE VON RECRUITER: {prompt}")
+    print(f"[{timestamp}] NEUE FRAGE: {prompt}")
 
     # Kontext zusammenbauen
     full_context = f"{SYSTEM_PROMPT}\n\nCONTEXT DATEN:\nLEBENSLAUF: {cv_text}\nSTELLENANZEIGE: {job_text}\nZEUGNISSE: {zeugnis_text}\n\nFRAGE: {prompt}"
@@ -159,10 +166,6 @@ if prompt := st.chat_input("Ihre Frage an Niko Kwekkeboom..."):
                 response = model.generate_content(full_context)
             st.markdown(response.text)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
-            
-            # LOGGING: Antwort auch loggen (optional, aber nützlich)
-            # print(f"[{timestamp}] ANTWORT BOT: {response.text[:100]}...") 
-
         except Exception as e:
             st.error(f"Ein Fehler ist aufgetreten: {e}")
             print(f"[{timestamp}] FEHLER: {e}")
