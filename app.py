@@ -99,4 +99,127 @@ if not st.session_state.authenticated:
         else:
             st.warning(f"Info: {PROFILE_IMAGE} nicht gefunden.")
     
-    st.markdown("<h2 style='text-align: center;'>Willkommen zum Digitalen Interview</h2>", unsafe_allow_html=
+    st.markdown("<h2 style='text-align: center;'>Willkommen zum Digitalen Interview</h2>", unsafe_allow_html=True)
+    
+    pwd = st.text_input("Zugangscode eingeben:", type="password")
+    if st.button("Starten"):
+        if pwd in ACCESS_CODES:
+            st.session_state.authenticated = True
+            st.session_state.current_user = ACCESS_CODES[pwd]
+            logging.info(f"LOGIN ERFOLGREICH: User '{ACCESS_CODES[pwd]}' hat sich eingeloggt.")
+            st.rerun()
+        else:
+            logging.warning(f"LOGIN FEHLGESCHLAGEN: PW '{pwd}'")
+            st.error("Falscher Code.")
+    st.stop()
+
+# --- HAUPTANWENDUNG ---
+if "GOOGLE_API_KEY" in st.secrets:
+    genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
+else:
+    st.error("API Key fehlt.")
+    st.stop()
+
+def load_pdf_text(filename):
+    if not os.path.exists(filename):
+        st.toast(f"⚠️ Datei fehlt: {filename}", icon="📂") 
+        return ""
+    try:
+        with open(filename, "rb") as f:
+            reader = PyPDF2.PdfReader(f)
+            text = ""
+            for page in reader.pages:
+                text += page.extract_text() + "\n"
+        return text
+    except Exception as e:
+        st.error(f"Fehler beim Lesen von {filename}: {e}")
+        return ""
+
+# DOKUMENTE LADEN
+cv_text = load_pdf_text("cv.pdf")
+job_text = load_pdf_text("stelle.pdf")
+zeugnis_text = load_pdf_text("zeugnisse.pdf")
+persoenlichkeit_text = load_pdf_text("persoenlichkeit.pdf")
+trainings_text = load_pdf_text("trainings.pdf")
+
+# MODEL INITIALISIERUNG
+try:
+    model = genai.GenerativeModel('gemini-3-flash-preview')
+except:
+    try:
+        model = genai.GenerativeModel('gemini-2.5-flash')
+    except Exception as e:
+        st.error(f"Modell-Fehler: {e}")
+        st.stop()
+
+# SAFETY SETTINGS
+safety_settings = {
+    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+}
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+    
+    # BEGRÜẞUNG
+    welcome_msg = (
+        "Moin! 👋 Ich bin der digitale Zwilling von Niko Kwekkeboom.\n\n"
+        "Ich kenne seinen Werdegang, sein Persönlichkeitsprofil sowie seine Vorstellungen zu Strategie, Führung und Innovation.\n\n"
+        "Frag mich gerne alles, was du wissen möchtest! \n\n"
+        "*(Hinweis: Dies ist ein KI-Experiment als Arbeitsprobe. Für verbindliche Details freue ich mich auf das persönliche Gespräch!)*"
+    )
+    st.session_state.messages.append({"role": "assistant", "content": welcome_msg})
+
+# --- LAYOUT HEADER ---
+col1, col2 = st.columns([1, 3])
+with col1:
+    if os.path.exists(PROFILE_IMAGE):
+        st.image(PROFILE_IMAGE, width=130)
+with col2:
+    st.title(NAME)
+    st.markdown("### Head of Enterprise Applications (SAP & ServiceNow) & Digital Innovation")
+    st.caption("Bewerbungs-Chatbot")
+
+st.markdown("---") 
+
+# Chat Loop
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+if prompt := st.chat_input("Ihre Frage..."):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+    
+    # Logging
+    user_id = st.session_state.current_user
+    logging.info(f"FRAGE von '{user_id}': {prompt}")
+
+    full_context = (
+        f"{SYSTEM_PROMPT}\n\nCONTEXT:\n"
+        f"CV: {cv_text}\n"
+        f"STELLE: {job_text}\n"
+        f"ZEUGNISSE: {zeugnis_text}\n"
+        f"PERSÖNLICHKEITSPROFIL (Zortify): {persoenlichkeit_text}\n"
+        f"TRAININGS & ZERTIFIKATE: {trainings_text}\n\n"
+        f"FRAGE: {prompt}"
+    )
+
+    with st.chat_message("assistant"):
+        try:
+            with st.spinner("Analysiere..."):
+                response = model.generate_content(full_context, safety_settings=safety_settings)
+                
+                if response.parts:
+                    st.markdown(response.text)
+                    st.session_state.messages.append({"role": "assistant", "content": response.text})
+                else:
+                    st.warning("Entschuldigung, ich konnte darauf keine Antwort generieren (Sicherheitsrichtlinie).")
+                    logging.error(f"BLOCKED: {response.prompt_feedback}")
+
+        except Exception as e:
+            st.error(f"Fehler: {e}")
+            logging.error(f"CRASH: {e}")
