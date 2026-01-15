@@ -224,6 +224,9 @@ if prompt := st.chat_input("Ihre Frage..."):
                     logging.error(f"CRASH ALL MODELS: {e2}")
 
             if response_text:
+                # ANTWORT LOGGEN (Das ist neu!)
+                logging.info(f"ANTWORT an '{user_id}': {response_text}")
+                
                 st.markdown(response_text)
                 st.session_state.messages.append({"role": "assistant", "content": response_text})
             elif not response_text and "model_v25" in locals():
