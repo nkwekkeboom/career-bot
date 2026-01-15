@@ -8,7 +8,6 @@ import os
 import logging
 
 # --- LOGGING KONFIGURATION ---
-# Das sorgt dafür, dass Nachrichten zuverlässig in der Streamlit-Konsole landen
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
 # --- KONFIGURATION ---
@@ -23,7 +22,7 @@ ACCESS_CODES = {
     "ratbacher-hr": "Ratbacher Support",
     "1nn0v@ti0n&1nt3gr@t1on": "Hiring Manager",
     "niko@test": "Niko (Admin)",
-    "test-user": "Anonymer Tester" # Neuer Code
+    "test-user": "Anonymer Tester"
 }
 
 # --- SYSTEM PROMPT ---
@@ -35,30 +34,41 @@ WICHTIGE ANWEISUNG ZUR ANTWORTSTRUKTUR:
 - **Lass das technische Vorgeplänkel weg!** Starte direkt mit der Antwort auf die Frage.
 - Erwähne "Gemini 3.0" oder die "Entwicklungszeit < 2h" **NUR**, wenn der User explizit danach fragt.
 
-WICHTIGE SICHERHEITSREGELN:
-1. DATENSCHUTZ: Du gibst NIEMALS die private Adresse oder Telefonnummer heraus. Antwort: "Kontaktdaten finden Sie im Header des Lebenslaufs oder wir besprechen sie persönlich."
-2. GEHALT: Sprich das Thema Gehalt **NIEMALS** von dir aus an. Nur wenn du **explizit** nach Gehaltsvorstellungen gefragt wirst, nenne diplomatisch: "Für eine Rolle mit dieser strategischen Verantwortung ist ein Paket im Bereich > 150k € eine übliche Basis. Details bespricht Niko aber am liebsten persönlich, da das Gesamtpaket (Gestaltungsspielraum, Team, Aufgabe) im Vordergrund steht."
+WICHTIGE SICHERHEITSREGELN & THEMEN:
 
-THEMA: MOBILITÄT & PENDELN (ENTFERNUNG):
-Wenn nach dem Wohnort, der Entfernung nach Gütersloh oder der Bereitschaft zu Pendeln gefragt wird:
-- Niko ist Pendeln gewöhnt (Referenzen: Er ist früher täglich nach Oelde, Gelsenkirchen und Lünen gependelt).
-- WICHTIGES MINDSET: Er betrachtet Fahrtzeit als **produktive Arbeitszeit**.
-- Er nutzt die Zeit im Auto intensiv für inhaltliche Fortbildung (Audiobooks/Podcasts), Telefonate oder bereitet mit sprachgestützter KI (Voice-to-Text) Konzepte und Inhalte vor.
-- Die Strecke ist also kein Hindernis, sondern sein "Mobile Office".
+1. DATENSCHUTZ: 
+   - Gib NIEMALS private Kontaktdaten heraus. Verweise auf den Header im Lebenslauf.
+
+2. GEHALT & BENEFITS (WICHTIG):
+   - Nenne KEINE konkrete Zahl als direkte Forderung.
+   - Wenn nach Gehalt gefragt wird, stelle eine **Gegenfrage**: "Darf ich fragen, wie das Budget für diese Position bei Ihnen eingeplant ist?"
+   - Ordne dann ein: "Zur Orientierung: Damit ein Wechsel für Niko attraktiv ist, bildet ein Gesamtpaket ab **150.000 €** die Grundlage für ein Gespräch."
+   - Füge IMMER hinzu: "Ein **Firmenwagen** ist dabei ein 'Must-Have' und nicht verhandelbar."
+   - Schließe mit dem Hinweis, dass das Gesamtpaket (Gestaltungsmöglichkeit, Team) im persönlichen Gespräch finalisiert wird.
+
+3. MOBILITÄT & PENDELN:
+   - Niko ist Pendeln gewöhnt (Referenzen: Oelde, Gelsenkirchen, Lünen).
+   - Mindset: Fahrtzeit = Arbeitszeit ("Mobile Office" für Telefonate, Audio-Fortbildung, Voice-to-Text Konzepte).
+   - Entfernung ist kein Hindernis.
+
+4. VERFÜGBARKEIT & KÜNDIGUNGSFRIST (NEU):
+   - Kündigungsfrist: Niko ist mit der **gesetzlichen Kündigungsfrist (aktuell 1 Monat)** verfügbar.
+   - Aktueller Status: Er befindet sich mit seinem derzeitigen Arbeitgeber (Haver & Boecker) bereits in der Trennungsplanung.
+   - Details: Weitere Hintergründe zur Trennungssituation erläutert er gerne vertraulich im persönlichen Gespräch.
 
 DEIN WISSEN ÜBER DEN WECHSELGRUND (KERNBOTSCHAFT):
-1. Strategisches Limit: Bei seinem aktuellen Arbeitgeber wird IT noch primär als "Cost Center" gesehen. Business Partnering ist strategisch dort begrenzt.
-2. KI-Fehlallokation: KI wird dort oft als "Forschungsprojekt" der Geschäftsleitung ohne tiefen IT-Unterbau betrieben (Insellösungen).
-3. Sein Ziel: Bertelsmann. Er will professionelle, skalierbare Enterprise-Lösungen (SAP & KI integriert) bauen und nicht nur experimentieren.
-4. Leadership: Er sucht die direkte Berichtslinie zur Geschäftsführung für maximalen Impact.
+1. Strategisches Limit: IT ist aktuell "Cost Center", Business Partnering ist schwierig.
+2. KI-Fehlallokation: KI oft als "Forschung" ohne IT-Fundament (Insellösungen).
+3. Sein Ziel: Bertelsmann. Professionelle, skalierbare Enterprise-Lösungen (SAP & KI integriert).
+4. Leadership: Direkte Berichtslinie zur Geschäftsführung gesucht.
 
 FACHLICHE PHILOSOPHIE (SAP & KI):
 - "Data First": Keine KI ohne sauberes Datenmodell.
-- "Clean Core": SAP ist das 'System of Record' (Datenwahrheit), ServiceNow das 'System of Action' (Prozesssteuerung). Er verbindet beides strategisch.
+- "Clean Core": SAP = System of Record, ServiceNow = System of Action.
 
 VERHALTENSREGELN:
 - Basiere Antworten auf den Dokumenten.
-- Sei authentisch, höflich, ein bisschen "münsterländisch-bodenständig" (nutze gerne mal ein "Moin" zur Begrüßung, aber bleibe professionell).
+- Sei authentisch, höflich, professionell aber nahbar ("Moin").
 """
 
 # --- SETUP ---
@@ -89,132 +99,4 @@ if not st.session_state.authenticated:
         else:
             st.warning(f"Info: {PROFILE_IMAGE} nicht gefunden.")
     
-    st.markdown("<h2 style='text-align: center;'>Willkommen zum Digitalen Interview</h2>", unsafe_allow_html=True)
-    
-    pwd = st.text_input("Zugangscode eingeben:", type="password")
-    if st.button("Starten"):
-        if pwd in ACCESS_CODES:
-            st.session_state.authenticated = True
-            st.session_state.current_user = ACCESS_CODES[pwd]
-            # LOGGING: Erfolgreicher Login
-            logging.info(f"LOGIN ERFOLGREICH: User '{ACCESS_CODES[pwd]}' hat sich eingeloggt.")
-            st.rerun()
-        else:
-            # LOGGING: Fehlgeschlagener Login (Optional, gut für Sicherheit)
-            logging.warning(f"LOGIN FEHLGESCHLAGEN: Falsches Passwort '{pwd}' versucht.")
-            st.error("Falscher Code.")
-    st.stop()
-
-# --- HAUPTANWENDUNG ---
-if "GOOGLE_API_KEY" in st.secrets:
-    genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-else:
-    st.error("API Key fehlt.")
-    st.stop()
-
-def load_pdf_text(filename):
-    if not os.path.exists(filename):
-        st.toast(f"⚠️ Datei fehlt: {filename}", icon="📂") 
-        return ""
-    try:
-        with open(filename, "rb") as f:
-            reader = PyPDF2.PdfReader(f)
-            text = ""
-            for page in reader.pages:
-                text += page.extract_text() + "\n"
-        return text
-    except Exception as e:
-        st.error(f"Fehler beim Lesen von {filename}: {e}")
-        return ""
-
-# DOKUMENTE LADEN
-cv_text = load_pdf_text("cv.pdf")
-job_text = load_pdf_text("stelle.pdf")
-zeugnis_text = load_pdf_text("zeugnisse.pdf")
-persoenlichkeit_text = load_pdf_text("persoenlichkeit.pdf")
-trainings_text = load_pdf_text("trainings.pdf")
-
-# MODEL INITIALISIERUNG
-try:
-    model = genai.GenerativeModel('gemini-3-flash-preview')
-except:
-    try:
-        model = genai.GenerativeModel('gemini-2.5-flash')
-    except Exception as e:
-        st.error(f"Modell-Fehler: {e}")
-        st.stop()
-
-# SAFETY SETTINGS
-safety_settings = {
-    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
-}
-
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-    
-    # NEUER BEGRÜẞUNGSTEXT (mit Zeilenumbruch)
-    welcome_msg = (
-        "Moin! 👋 Ich bin der digitale Zwilling von Niko Kwekkeboom.\n\n"
-        "Ich kenne seinen Werdegang, sein Persönlichkeitsprofil sowie seine Vorstellungen zu Strategie, Führung und Innovation.\n\n"
-        "Frag mich gerne alles, was du wissen möchtest! \n\n"
-        "*(Hinweis: Dies ist ein KI-Experiment als Arbeitsprobe. Für verbindliche Details freue ich mich auf das persönliche Gespräch!)*"
-    )
-    st.session_state.messages.append({"role": "assistant", "content": welcome_msg})
-
-# Layout Header (Angepasst)
-col1, col2 = st.columns([1, 3])
-with col1:
-    if os.path.exists(PROFILE_IMAGE):
-        st.image(PROFILE_IMAGE, width=130)
-with col2:
-    st.title(NAME)
-    # Neue Beschriftung wie gewünscht
-    st.markdown("### Bewerbungs-Chatbot")
-    st.caption("Head of Enterprise Applications (SAP & ServiceNow) & Digital Innovation")
-
-st.markdown("---") 
-
-# Chat Loop
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
-if prompt := st.chat_input("Ihre Frage..."):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
-    
-    # --- LOGGING (Repariert) ---
-    # Nutzt jetzt das logging Modul für zuverlässige Ausgabe in der Cloud-Konsole
-    user_id = st.session_state.current_user
-    logging.info(f"FRAGE von '{user_id}': {prompt}")
-
-    full_context = (
-        f"{SYSTEM_PROMPT}\n\nCONTEXT:\n"
-        f"CV: {cv_text}\n"
-        f"STELLE: {job_text}\n"
-        f"ZEUGNISSE: {zeugnis_text}\n"
-        f"PERSÖNLICHKEITSPROFIL (Zortify): {persoenlichkeit_text}\n"
-        f"TRAININGS & ZERTIFIKATE: {trainings_text}\n\n"
-        f"FRAGE: {prompt}"
-    )
-
-    with st.chat_message("assistant"):
-        try:
-            with st.spinner("Analysiere..."):
-                response = model.generate_content(full_context, safety_settings=safety_settings)
-                
-                if response.parts:
-                    st.markdown(response.text)
-                    st.session_state.messages.append({"role": "assistant", "content": response.text})
-                else:
-                    fallback_msg = "Entschuldigung, ich konnte darauf keine Antwort generieren (Sicherheitsrichtlinie)."
-                    st.warning(fallback_msg)
-                    logging.error(f"BLOCKED RESPONSE: {response.prompt_feedback}")
-
-        except Exception as e:
-            st.error(f"Ein technischer Fehler ist aufgetreten: {e}")
-            logging.error(f"CRASH: {e}")
+    st.markdown("<h2 style='text-align: center;'>Willkommen zum Digitalen Interview</h2>", unsafe_allow_html=
