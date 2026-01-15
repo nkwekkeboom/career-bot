@@ -5,7 +5,7 @@ from io import BytesIO
 
 # --- KONFIGURATION ---
 PAGE_TITLE = "Digitaler Assistent von Niko Kwekkeboom"
-PAGE_ICON = "🤖"
+PAGE_ICON = "🚀" # Rakete für High-Tech
 NAME = "Niko Kwekkeboom"
 PASSWORD = "bertelsmann-sap" 
 
@@ -39,7 +39,7 @@ Seine Sichtweise: ServiceNow ist das perfekte 'System of Action', um Workflows e
 Er sieht hier den großen Vorteil, den SAP-Kern 'clean' zu halten (Clean Core Strategy), indem man komplexe Genehmigungsprozesse nach ServiceNow auslagert. Da er die SAP-Datenstrukturen tief durchdringt, ist er der ideale Partner für die ServiceNow-Experten, um beide Welten sauber zu verbinden."
 
 VERHALTENSREGELN:
-- Basiere Antworten immer auf den hochgeladenen Dokumenten (CV, Stelle, Zeugnisse, Persönlichkeitstest).
+- Basiere Antworten immer auf den hochgeladenen Dokumenten (CV, Stelle, Zeugnisse).
 - Wenn es um Details zu internen Problemen des alten Arbeitgebers geht oder du dir unsicher bist: Blocke höflich ab und sage: "Das sind Details, die Niko Kwekkeboom gerne in einem persönlichen Gespräch vertieft. Da möchte ich nichts Falsches wiedergeben."
 - Gehaltsvorstellung: Stelle eine Gegenfrage, wie das Budget der Stelle aussieht und weise ab einem genannten Budget von > 150.000 darauf hin, dass das nach einer guten Grundlage für ein persönliches Gespräch klingt.
 """
@@ -47,51 +47,14 @@ VERHALTENSREGELN:
 # --- SETUP ---
 st.set_page_config(page_title=PAGE_TITLE, page_icon=PAGE_ICON)
 
-# API Key Check
-if "GOOGLE_API_KEY" in st.secrets:
-    genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-else:
-    st.error("API Key fehlt in den Secrets.")
-    st.stop()
-
-# --- DIAGNOSE STARTEN ---
-# Wir prüfen, welche Modelle für deinen Key verfügbar sind
-st.subheader("🔧 System-Diagnose (Verfügbare Modelle)")
-try:
-    available_models = []
-    for m in genai.list_models():
-        if 'generateContent' in m.supported_generation_methods:
-            available_models.append(m.name)
-    
-    st.write("Gefundene Modelle:", available_models)
-    
-    # Automatische Auswahl des besten Modells aus der Liste
-    if 'models/gemini-1.5-flash' in available_models:
-        model_name = 'gemini-1.5-flash'
-    elif 'models/gemini-1.5-pro' in available_models:
-        model_name = 'gemini-1.5-pro'
-    elif 'models/gemini-pro' in available_models:
-        model_name = 'gemini-pro'
-    else:
-        st.error("Kein geeignetes Modell gefunden!")
-        st.stop()
-        
-    st.success(f"Verwende Modell: {model_name}")
-    model = genai.GenerativeModel(model_name)
-
-except Exception as e:
-    st.error(f"Fehler bei der Modell-Abfrage: {e}")
-    st.stop()
-# --- DIAGNOSE ENDE ---
-
 # Passwort-Schutz
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
 if not st.session_state.authenticated:
-    st.title("🔒 Geschützter Bereich")
+    st.title("🔒 Login")
     pwd = st.text_input("Bitte Zugangscode eingeben:", type="password")
-    if st.button("Login"):
+    if st.button("Starten"):
         if pwd == PASSWORD:
             st.session_state.authenticated = True
             st.rerun()
@@ -101,13 +64,13 @@ if not st.session_state.authenticated:
 
 # --- HAUPTANWENDUNG ---
 st.title(f"💬 Chat mit {NAME}'s AI Agent")
-st.caption("Fragen Sie mich zu meinem Werdegang, SAP-Strategien oder Führungsstil.")
+st.caption("Powered by Google Gemini 2.5 Flash")
 
 # API Key Check
 if "GOOGLE_API_KEY" in st.secrets:
     genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 else:
-    st.error("API Key fehlt in den Secrets. Bitte in Streamlit Settings eintragen.")
+    st.error("Systemfehler: API Key fehlt.")
     st.stop()
 
 # Dateien laden 
@@ -120,30 +83,25 @@ def load_pdf_text(filename):
                 text += page.extract_text() + "\n"
         return text
     except FileNotFoundError:
-        return "" # Silent fail, aber kein Crash
+        return "" 
 
-# DOKUMENTE LADEN (Dateinamen hier prüfen!)
-# Bitte stelle sicher, dass die Datei im Repo wirklich exakt so heißt!
-cv_text = load_pdf_text("cv.pdf")  # KORRIGIERT: War vorher cv.pdf.pdf
+# DOKUMENTE LADEN 
+cv_text = load_pdf_text("cv.pdf")
 job_text = load_pdf_text("stelle.pdf")
 zeugnis_text = load_pdf_text("zeugnisse.pdf")
 
-# --- MODEL INITIALISIERUNG (ROBUST) ---
-# Wir probieren Modelle der Reihe nach durch, um "NotFound" zu vermeiden
+# --- MODEL INITIALISIERUNG (Fix auf Gemini 2.5 Flash) ---
 try:
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    # Test-Call um zu sehen ob das Modell erreichbar ist
-    model.generate_content("test") 
-except:
-    try:
-        # Fallback auf Pro
-        model = genai.GenerativeModel('gemini-1.5-pro')
-    except:
-        # Fallback auf Legacy
-        model = genai.GenerativeModel('gemini-pro')
+    # Wir nehmen das erste Modell aus deiner Liste (Index 0), das ist High-Performance
+    model = genai.GenerativeModel('gemini-2.5-flash')
+except Exception as e:
+    st.error(f"Modell-Fehler: {e}")
+    st.stop()
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
+    # Begrüßung durch den Bot
+    st.session_state.messages.append({"role": "assistant", "content": "Hallo! Ich bin der digitale Assistent von Niko. Fragen Sie mich gerne zu seiner SAP-Strategie, seiner Führungserfahrung oder warum er perfekt zu Bertelsmann passt."})
 
 # Chatverlauf anzeigen
 for message in st.session_state.messages:
