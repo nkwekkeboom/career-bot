@@ -23,7 +23,7 @@ ACCESS_CODES = {
     "ratbacher-hr": "Ratbacher Support",
     "1nn0v@ti0n&1nt3gr@t1on": "Hiring Manager",
     "niko@test": "Niko (Admin)",
-    "test-user": "Tester"
+    "test-user": "Anonymer Tester" # Neuer Code
 }
 
 # --- SYSTEM PROMPT ---
@@ -166,4 +166,55 @@ if "messages" not in st.session_state:
 
 # Layout Header (Angepasst)
 col1, col2 = st.columns([1, 3])
-with
+with col1:
+    if os.path.exists(PROFILE_IMAGE):
+        st.image(PROFILE_IMAGE, width=130)
+with col2:
+    st.title(NAME)
+    # Neue Beschriftung wie gewünscht
+    st.markdown("### Bewerbungs-Chatbot")
+    st.caption("Head of Enterprise Applications (SAP & ServiceNow) & Digital Innovation")
+
+st.markdown("---") 
+
+# Chat Loop
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+if prompt := st.chat_input("Ihre Frage..."):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+    
+    # --- LOGGING (Repariert) ---
+    # Nutzt jetzt das logging Modul für zuverlässige Ausgabe in der Cloud-Konsole
+    user_id = st.session_state.current_user
+    logging.info(f"FRAGE von '{user_id}': {prompt}")
+
+    full_context = (
+        f"{SYSTEM_PROMPT}\n\nCONTEXT:\n"
+        f"CV: {cv_text}\n"
+        f"STELLE: {job_text}\n"
+        f"ZEUGNISSE: {zeugnis_text}\n"
+        f"PERSÖNLICHKEITSPROFIL (Zortify): {persoenlichkeit_text}\n"
+        f"TRAININGS & ZERTIFIKATE: {trainings_text}\n\n"
+        f"FRAGE: {prompt}"
+    )
+
+    with st.chat_message("assistant"):
+        try:
+            with st.spinner("Analysiere..."):
+                response = model.generate_content(full_context, safety_settings=safety_settings)
+                
+                if response.parts:
+                    st.markdown(response.text)
+                    st.session_state.messages.append({"role": "assistant", "content": response.text})
+                else:
+                    fallback_msg = "Entschuldigung, ich konnte darauf keine Antwort generieren (Sicherheitsrichtlinie)."
+                    st.warning(fallback_msg)
+                    logging.error(f"BLOCKED RESPONSE: {response.prompt_feedback}")
+
+        except Exception as e:
+            st.error(f"Ein technischer Fehler ist aufgetreten: {e}")
+            logging.error(f"CRASH: {e}")
