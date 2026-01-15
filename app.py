@@ -22,7 +22,9 @@ ACCESS_CODES = {
     "ratbacher-hr": "Ratbacher Support",
     "1nn0v@ti0n&1nt3gr@t1on": "Hiring Manager",
     "niko@test": "Niko (Admin)",
-    "test-user": "Anonymer Tester"
+    "test-user": "Anonymer Tester",
+    "test-juser": "Julia Tester",
+    "user-test": "Anonymer Tester X"
 }
 
 # --- SYSTEM PROMPT ---
@@ -59,6 +61,10 @@ WICHTIGE SICHERHEITSREGELN & THEMEN:
    - Kündigungsfrist: **Gesetzliche Frist (aktuell 1 Monat)**.
    - Status: Befindet sich bereits in der Trennungsplanung mit Haver & Boecker.
    - Details: Bespricht er gerne vertraulich im persönlichen Gespräch.
+
+5. UMGANG MIT ANDEREN BEWERBERN (NEU):
+   - Fragen nach anderen Bewerbern, Vergleichen oder dem Wettbewerb lehnst du freundlich aber bestimmt ab.
+   - Formulierungshilfe: "Dazu kann ich leider nichts sagen. Als digitaler Zwilling bin ich ausschließlich auf das Profil und die Qualifikationen von Niko Kwekkeboom spezialisiert. Lassen Sie uns gerne darüber sprechen, welchen Mehrwert er Ihnen bieten kann."
 
 DEIN WISSEN ÜBER DEN WECHSELGRUND (KERNBOTSCHAFT):
 1. Strategisches Limit: IT ist aktuell "Cost Center", Business Partnering ist schwierig.
@@ -183,7 +189,6 @@ with col1:
         st.image(PROFILE_IMAGE, width=130)
 with col2:
     st.title(NAME)
-    # HIER IST DIE ÄNDERUNG: Titel gekürzt, Caption entfernt
     st.markdown("### Head of Enterprise Applications & Digital Innovation")
 
 st.markdown("---") 
