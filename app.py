@@ -13,9 +13,9 @@ PROFILE_IMAGE = "profilbild.png"
 
 # --- ZUGANGSVERWALTUNG ---
 ACCESS_CODES = {
-    "1nn0v@ti0n&1nt3gr@t1on": "Standard (Deckblatt)",
-    "bertelsmann-hr": "Recruiting Team",
-    "bertelsmann-lead": "Hiring Manager / CIO",
+    "1nn0v@ti0n>1nt3gr@t1on": "Link CV ",
+    "ratbacher-test": "Ratbacher Headhunter",
+    "1nn0v@ti0n&1nt3gr@t1on": "Hiring Manager",
     "niko-test": "Niko (Admin)"
 }
 
