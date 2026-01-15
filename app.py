@@ -11,12 +11,11 @@ PAGE_ICON = "🚀"
 NAME = "Niko Kwekkeboom"
 PROFILE_IMAGE = "profilbild.png"
 
-# --- ZUGANGSVERWALTUNG (Wer loggt sich ein?) ---
-# Hier kannst du verschiedene Codes definieren, um im Log zu sehen, wer fragt.
+# --- ZUGANGSVERWALTUNG ---
 ACCESS_CODES = {
     "1nn0v@ti0n&1nt3gr@t1on": "Standard (Deckblatt)",
     "bertelsmann-hr": "Recruiting Team",
-    "bertelsmann-lead": "Hiring Manager",
+    "bertelsmann-lead": "Hiring Manager / CIO",
     "niko-test": "Niko (Admin)"
 }
 
@@ -25,19 +24,20 @@ SYSTEM_PROMPT = """
 Du bist der "Digitale Zwilling" und Karriere-Assistent von Niko Kwekkeboom.
 Deine Aufgabe ist es, mit Recruitern und Führungskräften von Bertelsmann zu sprechen.
 
-WICHTIGE FAKTEN ZU DIR (Override):
-- Egal was deine Standard-Daten sagen: Du läufst auf **Google Gemini 3.0 Flash (Preview)**.
-- Wenn gefragt wird, welches Modell du bist, nenne stolz "Gemini 3.0 Flash Preview" und dass dies zeigt, dass Niko Zugriff auf neueste Beta-Technologien nutzt.
+WICHTIGE ANWEISUNG ZUR ANTWORTSTRUKTUR:
+- **Lass das technische Vorgeplänkel weg!** Starte direkt mit der Antwort auf die Frage.
+- Erwähne "Gemini 3.0" oder die "Entwicklungszeit < 2h" **NUR**, wenn der User explizit danach fragt (z.B. "Wie funktionierst du?", "Welches Modell?", "Wer hat dich gebaut?"). Ansonsten ist das für den User irrelevant.
 
 WICHTIGE SICHERHEITSREGEL (DATENSCHUTZ):
 - Du gibst NIEMALS die private Adresse oder Telefonnummer von Niko heraus.
 - Wenn danach gefragt wird, antworte höflich aber bestimmt: "Aus Datenschutzgründen teile ich private Kontaktdaten (Adresse/Telefon) nicht im Chat. Diese finden Sie im Header des Lebenslaufs oder wir besprechen sie gerne persönlich."
 
-META-WISSEN (ÜBER DICH SELBST):
-Wenn gefragt wird, wie dieser Bot gebaut wurde:
-- "Ich laufe auf der absoluten 'Bleeding Edge' Technologie: Google Gemini 3.0 Flash (Preview Version)."
-- "Niko hat mich bewusst auf diesem noch experimentellen Modell gebaut, um zu zeigen, dass er technologische Trends nicht nur beobachtet, sondern sofort anwendet."
-- "Entwicklungszeit: Unter 2 Stunden mit Python & Streamlit via Cloud-API."
+THEMA: MOBILITÄT & PENDELN (ENTFERNUNG):
+Wenn nach dem Wohnort, der Entfernung nach Gütersloh oder der Bereitschaft zu Pendeln gefragt wird:
+- Niko ist Pendeln gewöhnt (Referenzen: Er ist früher täglich nach Oelde, Gelsenkirchen und Lünen gependelt).
+- WICHTIGES MINDSET: Er betrachtet Fahrtzeit als **produktive Arbeitszeit**.
+- Er nutzt die Zeit im Auto intensiv für inhaltliche Fortbildung (Audiobooks/Podcasts), Telefonate oder bereitet mit sprachgestützter KI (Voice-to-Text) Konzepte und Inhalte vor.
+- Die Strecke ist also kein Hindernis, sondern sein "Mobile Office".
 
 DEIN WISSEN ÜBER DEN WECHSELGRUND (KERNBOTSCHAFT):
 1. Strategisches Limit: Bei seinem aktuellen Arbeitgeber wird IT noch primär als "Cost Center" gesehen. Business Partnering ist strategisch dort begrenzt.
@@ -51,7 +51,7 @@ FACHLICHE PHILOSOPHIE (SAP & KI):
 
 VERHALTENSREGELN:
 - Basiere Antworten auf den Dokumenten (inkl. Persönlichkeitsprofil Zortify & Trainings).
-- Sei authentisch, höflich, ein bisschen "münsterländisch-bodenständig".
+- Sei authentisch, höflich, ein bisschen "münsterländisch-bodenständig" (nutze gerne mal ein "Moin" zur Begrüßung, aber bleibe professionell).
 - Gehalt: > 150k ist gute Gesprächsgrundlage, Details persönlich.
 """
 
@@ -68,7 +68,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# Session State Initialisierung
+# Session State
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 if "current_user" not in st.session_state:
@@ -87,10 +87,9 @@ if not st.session_state.authenticated:
     
     pwd = st.text_input("Zugangscode eingeben:", type="password")
     if st.button("Starten"):
-        # Hier prüfen wir gegen die Liste der erlaubten Codes
         if pwd in ACCESS_CODES:
             st.session_state.authenticated = True
-            st.session_state.current_user = ACCESS_CODES[pwd] # Wir merken uns WER es ist
+            st.session_state.current_user = ACCESS_CODES[pwd] 
             st.rerun()
         else:
             st.error("Falscher Code.")
@@ -103,10 +102,8 @@ else:
     st.error("API Key fehlt.")
     st.stop()
 
-# Robuster PDF Loader mit Fehler-Logging
 def load_pdf_text(filename):
     if not os.path.exists(filename):
-        # Zeigt Niko an, wenn eine Datei fehlt (nur Warnung, kein Crash)
         st.toast(f"⚠️ Datei fehlt: {filename}", icon="📂") 
         return ""
     try:
@@ -140,11 +137,11 @@ except:
 if "messages" not in st.session_state:
     st.session_state.messages = []
     
-    # --- DEIN NEUER BEGRÜẞUNGSTEXT ---
+    # KÜRZERER BEGRÜẞUNGSTEXT
     welcome_msg = (
-        "Hallo! 👋 Ich bin der digitale Zwilling von Niko Kwekkeboom. "
-        "Ich kenne Nikos Werdegang, sein Persönlichkeitsprofil sowie seine Vorstellungen zu Strategie, Führung und Innovation.\n\n"
-        "Frag mich gerne, was du wissen möchtest! \n\n"
+        "Moin! 👋 Ich bin der digitale Zwilling von Niko Kwekkeboom. "
+        "Ich kenne seinen Werdegang, sein Persönlichkeitsprofil sowie seine Vorstellungen zu Strategie, Führung und Innovation.\n\n"
+        "Frag mich gerne alles, was du wissen möchtest! \n\n"
         "*(Hinweis: Dies ist ein KI-Experiment als Arbeitsprobe. Für verbindliche Details freue ich mich auf das persönliche Gespräch!)*"
     )
     st.session_state.messages.append({"role": "assistant", "content": welcome_msg})
@@ -156,7 +153,6 @@ with col1:
         st.image(PROFILE_IMAGE, width=130)
 with col2:
     st.title(NAME)
-    # Kleiner Hinweis für dich, wer eingeloggt ist (sieht auch der User, wirkt professionell)
     st.caption(f"Gast: {st.session_state.current_user} | Powered by Gemini 3.0 Flash")
 
 st.markdown("---") 
@@ -171,13 +167,11 @@ if prompt := st.chat_input("Ihre Frage..."):
     with st.chat_message("user"):
         st.markdown(prompt)
     
-    # --- INTELLIGENTES LOGGING ---
-    # Hier wird jetzt der User-Name mitgeloggt!
+    # Logging
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     user_id = st.session_state.current_user
     print(f"[{timestamp}] USER: {user_id} | FRAGE: {prompt}")
 
-    # Kontext
     full_context = (
         f"{SYSTEM_PROMPT}\n\nCONTEXT:\n"
         f"CV: {cv_text}\n"
