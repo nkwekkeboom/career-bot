@@ -16,8 +16,9 @@ PROFILE_IMAGE = "profilbild.png"
 ACCESS_CODES = {
     "1nn0v@ti0n&1nt3gr@t1on": "Standard (Deckblatt)",
     "bertelsmann-hr": "Recruiting Team",
-    "bertelsmann-lead": "Hiring Manager / CIO",
+    "bertelsmann-lead": "Hiring Manager",
     "niko-test": "Niko (Admin)"
+    "julia-test": "Julia (Tester)"
 }
 
 # --- SYSTEM PROMPT ---
