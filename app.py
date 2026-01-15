@@ -18,7 +18,6 @@ ACCESS_CODES = {
     "bertelsmann-hr": "Recruiting Team",
     "bertelsmann-lead": "Hiring Manager",
     "niko-test": "Niko (Admin)"
-    "julia-test": "Julia (Tester)"
 }
 
 # --- SYSTEM PROMPT ---
