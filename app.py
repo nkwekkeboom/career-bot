@@ -22,9 +22,9 @@ ACCESS_CODES = {
     "ratbacher-hr": "Ratbacher Support",
     "1nn0v@ti0n&1nt3gr@t1on": "Hiring Manager",
     "niko@test": "Niko (Admin)",
-    "test-user": "Anonymer Tester 1",
-    "test-user-2": "Anonymer Tester 2",
-    "test-user-3": "Anonymer Tester 3"
+    "test-user": "Anonymer Tester",
+    "test-juser": "Tester Julia",
+    "user-test": "Anonymer Tester X"
 }
 
 # --- SYSTEM PROMPT ---
