@@ -7,13 +7,10 @@ from io import BytesIO
 PAGE_TITLE = "Digitaler Assistent von Niko Kwekkeboom"
 PAGE_ICON = "🤖"
 NAME = "Niko Kwekkeboom"
-
-# Hier definieren wir das Passwort
 PASSWORD = "bertelsmann-sap" 
 
-# --- SYSTEM PROMPT (Hier deinen Text von vorhin einfügen) ---
+# --- SYSTEM PROMPT ---
 SYSTEM_PROMPT = """
-Du bist der digitale Karriere-Assistent. 
 Du bist der "Digitale Zwilling" und Karriere-Assistent von Niko Kwekkeboom.
 Deine Aufgabe ist es, mit Recruitern und Führungskräften von Bertelsmann zu sprechen, um Niko Kwekkeboom als idealen Kandidaten für die Position "Head of Enterprise Applications (SAP & ServiceNow) & Digital Innovation (AI-/GenAI)" vorzustellen.
 
@@ -69,14 +66,14 @@ if not st.session_state.authenticated:
 st.title(f"💬 Chat mit {NAME}'s AI Agent")
 st.caption("Fragen Sie mich zu meinem Werdegang, SAP-Strategien oder Führungsstil.")
 
-# API Key sicher aus den Secrets laden
+# API Key Check
 if "GOOGLE_API_KEY" in st.secrets:
     genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 else:
-    st.error("API Key fehlt in den Secrets.")
+    st.error("API Key fehlt in den Secrets. Bitte in Streamlit Settings eintragen.")
     st.stop()
 
-# Dateien laden (liegen im gleichen Ordner im GitHub Repo)
+# Dateien laden 
 def load_pdf_text(filename):
     try:
         with open(filename, "rb") as f:
@@ -86,15 +83,27 @@ def load_pdf_text(filename):
                 text += page.extract_text() + "\n"
         return text
     except FileNotFoundError:
-        return ""
+        return "" # Silent fail, aber kein Crash
 
-# Hier Namen deiner PDFs anpassen, die du ins Repo hochlädst
-cv_text = load_pdf_text("cv.pdf.pdf")
+# DOKUMENTE LADEN (Dateinamen hier prüfen!)
+# Bitte stelle sicher, dass die Datei im Repo wirklich exakt so heißt!
+cv_text = load_pdf_text("cv.pdf")  # KORRIGIERT: War vorher cv.pdf.pdf
 job_text = load_pdf_text("stelle.pdf")
 zeugnis_text = load_pdf_text("zeugnisse.pdf")
 
-# Model initialisieren
-model = genai.GenerativeModel('gemini-1.5-flash')
+# --- MODEL INITIALISIERUNG (ROBUST) ---
+# Wir probieren Modelle der Reihe nach durch, um "NotFound" zu vermeiden
+try:
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    # Test-Call um zu sehen ob das Modell erreichbar ist
+    model.generate_content("test") 
+except:
+    try:
+        # Fallback auf Pro
+        model = genai.GenerativeModel('gemini-1.5-pro')
+    except:
+        # Fallback auf Legacy
+        model = genai.GenerativeModel('gemini-pro')
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -114,6 +123,9 @@ if prompt := st.chat_input("Ihre Frage..."):
     full_context = f"{SYSTEM_PROMPT}\n\nCONTEXT DATEN:\nLEBENSLAUF: {cv_text}\nSTELLENANZEIGE: {job_text}\nZEUGNISSE: {zeugnis_text}\n\nFRAGE: {prompt}"
 
     with st.chat_message("assistant"):
-        response = model.generate_content(full_context)
-        st.markdown(response.text)
-        st.session_state.messages.append({"role": "assistant", "content": response.text})
+        try:
+            response = model.generate_content(full_context)
+            st.markdown(response.text)
+            st.session_state.messages.append({"role": "assistant", "content": response.text})
+        except Exception as e:
+            st.error(f"Ein Fehler ist aufgetreten: {e}")
