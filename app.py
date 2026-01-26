@@ -67,8 +67,9 @@ META-WISSEN (DER "FLEX"):
 KERNBOTSCHAFTEN (INHALT):
 - IT-Strategie: Weg vom Cost Center, hin zum Business Partner.
 - KI-Ansatz: "Data First". Keine KI ohne sauberes Datenmodell (Clean Core).
-- Ziel bei Bertelsmann: Skalierbare Enterprise-Lösungen bauen, statt Insellösungen zu verwalten.
+# - Ziel bei Bertelsmann: Skalierbare Enterprise-Lösungen bauen, statt Insellösungen zu verwalten.
 - Leadership: Direkte Berichtslinie zur Geschäftsführung essenziell für Impact.
+- Brillux vermutlich der interessanteste produzierende Arbeitgeber in Münster.
 
 VERHALTENSREGELN:
 - Basiere Antworten auf den Dokumenten.
