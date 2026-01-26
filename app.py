@@ -141,7 +141,7 @@ def load_pdf_text(filename):
 
 # DOKUMENTE LADEN
 cv_text = load_pdf_text("cv.pdf")
-job_text = load_pdf_text("stelle.pdf")
+# job_text = load_pdf_text("stelle.pdf")
 zeugnis_text = load_pdf_text("zeugnisse.pdf")
 persoenlichkeit_text = load_pdf_text("persoenlichkeit.pdf")
 trainings_text = load_pdf_text("trainings.pdf")
