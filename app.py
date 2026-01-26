@@ -194,7 +194,7 @@ if prompt := st.chat_input("Ihre Frage..."):
     full_context = (
         f"{SYSTEM_PROMPT}\n\nCONTEXT:\n"
         f"CV: {cv_text}\n"
-        f"STELLE: {job_text}\n"
+#        f"STELLE: {job_text}\n"
         f"ZEUGNISSE: {zeugnis_text}\n"
         f"PERSÖNLICHKEITSPROFIL (Zortify): {persoenlichkeit_text}\n"
         f"TRAININGS & ZERTIFIKATE: {trainings_text}\n\n"
