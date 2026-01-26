@@ -20,6 +20,7 @@ PROFILE_IMAGE = "profilbild.png"
 ACCESS_CODES = {
     "<1nn0v@ti0n&1nt3gr@t1on>": "Link CV",
     "ratbacher-hr": "Ratbacher Support",
+    "1hapeko!": "hapeko",
     "1nn0v@ti0n&1nt3gr@t1on": "Hiring Manager",
     "niko@test": "Niko (Admin)",
     "test-user": "Anonymer Tester",
