@@ -1,6 +1,6 @@
 import streamlit as st
-import google.genai as genai
-from google.genai.types import HarmCategory, HarmBlockThreshold
+import google.generativeai as genai
+from google.generativeai.types import HarmCategory, HarmBlockThreshold
 import PyPDF2
 from io import BytesIO
 import time
